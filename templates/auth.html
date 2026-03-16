@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tindahan POS — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  --bg:#eee8ff;--cg:#6ddc8b;--cb:#7ec8f7;--cp:#c4b0ff;--cy:#ffe066;--cpk:#ffadd6;--cpe:#ffbf9b;
+  --tx:#2d2447;--ts:#7b6fa0;--tl:#b0a8c8;--dn:#ff6b8a;
+  --s3:0 8px 0 rgba(0,0,0,.13),0 14px 28px rgba(0,0,0,.11);
+  --s2:0 4px 0 rgba(0,0,0,.1),0 8px 18px rgba(0,0,0,.09);
+  --s1:0 2px 0 rgba(0,0,0,.08),0 4px 10px rgba(0,0,0,.06);
+  --ins:inset 0 2px 8px rgba(255,255,255,.8),inset 0 -2px 4px rgba(0,0,0,.05);
+  --rxl:28px;--rlg:22px;--rmd:16px;--rsm:10px;--rf:999px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Nunito',sans-serif;background:var(--bg);color:var(--tx);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:1rem;overflow-x:hidden;
+}
+body::before{content:'';position:fixed;width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,#c4b0ff45,transparent 70%);top:-250px;left:-250px;pointer-events:none}
+body::after{content:'';position:fixed;width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,#7ec8f745,transparent 70%);bottom:-200px;right:-200px;pointer-events:none}
+
+.card{
+  background:white;border-radius:var(--rxl);box-shadow:var(--s3);
+  padding:2rem 1.75rem;width:100%;max-width:420px;
+  border:2px solid rgba(255,255,255,.9);position:relative;overflow:hidden;
+  animation:slideUp .4s cubic-bezier(.34,1.56,.64,1);
+}
+.card::before{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:var(--ins);pointer-events:none;z-index:0}
+.card>*{position:relative;z-index:1}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.brand{text-align:center;margin-bottom:1.75rem}
+.brand-icon{width:68px;height:68px;background:linear-gradient(135deg,var(--cg),var(--cb));
+  border-radius:20px;box-shadow:var(--s2);display:flex;align-items:center;justify-content:center;
+  font-size:2rem;margin:0 auto .75rem}
+.brand h1{font-family:'Fredoka One',cursive;font-size:1.9rem;color:var(--tx);line-height:1.1}
+.brand p{font-size:.82rem;color:var(--ts);font-weight:700;margin-top:.2rem}
+
+.tabs{display:flex;background:#f5f0ff;border-radius:var(--rf);padding:.3rem;margin-bottom:1.5rem;gap:.3rem}
+.tab{flex:1;padding:.55rem;border:none;border-radius:var(--rf);font-family:'Nunito',sans-serif;
+  font-weight:800;font-size:.88rem;cursor:pointer;background:transparent;color:var(--ts);
+  transition:all .2s cubic-bezier(.34,1.56,.64,1)}
+.tab.active{background:white;color:var(--tx);box-shadow:var(--s1)}
+
+.form{display:none}.form.active{display:flex;flex-direction:column;gap:.75rem}
+
+.fg{display:flex;flex-direction:column;gap:.3rem}
+.fg label{font-size:.75rem;font-weight:800;color:var(--ts);text-transform:uppercase;letter-spacing:.05em}
+.fi{padding:.7rem .9rem;border:2px solid #e8e0f5;border-radius:var(--rmd);
+  font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:600;color:var(--tx);
+  background:#faf8ff;transition:all .2s;width:100%}
+.fi:focus{outline:none;border-color:var(--cp);background:white;box-shadow:0 0 0 4px rgba(196,176,255,.2),var(--s1)}
+.pw-wrap{position:relative}.pw-wrap .fi{padding-right:2.8rem}
+.pw-eye{position:absolute;right:.85rem;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--tl);cursor:pointer;font-size:.9rem;padding:0}
+.pw-eye:hover{color:var(--ts)}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:.45rem;
+  padding:.78rem 1.3rem;border:2px solid transparent;border-radius:var(--rf);
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:.95rem;cursor:pointer;
+  transition:all .18s cubic-bezier(.34,1.56,.64,1);box-shadow:var(--s2);width:100%;margin-top:.25rem}
+.btn:hover{transform:translateY(-3px);box-shadow:var(--s3)}
+.btn:active{transform:translateY(1px);box-shadow:var(--s1)}
+.btn:disabled{opacity:.55;pointer-events:none}
+.btn-g{background:var(--cg);color:#1b5e32;border-color:#4dc876}
+.btn-p{background:var(--cp);color:#3a1e7a;border-color:#a98cff}
+
+.err{background:#ffe8ee;color:#c41a45;border:1.5px solid #ffb3c5;
+  border-radius:var(--rmd);padding:.6rem .85rem;font-size:.82rem;font-weight:700;
+  display:none;align-items:center;gap:.4rem}
+.err.on{display:flex}
+.err i{flex-shrink:0}
+
+.divider{display:flex;align-items:center;gap:.75rem;margin:.25rem 0}
+.divider::before,.divider::after{content:'';flex:1;height:2px;background:#f0eaff;border-radius:999px}
+.divider span{font-size:.75rem;font-weight:800;color:var(--tl)}
+
+.spin{display:inline-block;width:14px;height:14px;border:2.5px solid rgba(0,0,0,.2);
+  border-top-color:currentColor;border-radius:50%;animation:sp .5s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.floaters{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:-1}
+.floater{position:absolute;border-radius:50%;animation:float 8s ease-in-out infinite}
+.f1{width:80px;height:80px;background:var(--cg);top:10%;left:5%;opacity:.35;animation-delay:0s}
+.f2{width:60px;height:60px;background:var(--cb);top:20%;right:8%;opacity:.3;animation-delay:2s}
+.f3{width:50px;height:50px;background:var(--cy);bottom:25%;left:10%;opacity:.35;animation-delay:4s}
+.f4{width:70px;height:70px;background:var(--cpk);bottom:15%;right:6%;opacity:.3;animation-delay:1s}
+.f5{width:40px;height:40px;background:var(--cpe);top:50%;left:3%;opacity:.3;animation-delay:3s}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.08)}}
+</style>
+</head>
+<body>
+
+<div class="floaters">
+  <div class="floater f1"></div><div class="floater f2"></div>
+  <div class="floater f3"></div><div class="floater f4"></div><div class="floater f5"></div>
+</div>
+
+<div class="card">
+  <div class="brand">
+    <div class="brand-icon">🏪</div>
+    <h1>Tindahan POS</h1>
+    <p>Your neighbourhood store system</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+    <button class="tab" id="tabReg" onclick="switchTab('register')">Create Account</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="form active" id="loginForm">
+    <div class="err" id="loginErr"><i class="fas fa-exclamation-circle"></i><span id="loginErrMsg"></span></div>
+    <div class="fg">
+      <label>Username</label>
+      <input class="fi" id="lUser" type="text" placeholder="your username" autocomplete="username">
+    </div>
+    <div class="fg">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input class="fi" id="lPass" type="password" placeholder="••••••••" autocomplete="current-password">
+        <button class="pw-eye" onclick="togglePw('lPass',this)" type="button"><i class="fas fa-eye"></i></button>
+      </div>
+    </div>
+    <button class="btn btn-g" id="loginBtn" onclick="doLogin()">
+      <i class="fas fa-sign-in-alt"></i> Sign In
+    </button>
+  </div>
+
+  <!-- REGISTER -->
+  <div class="form" id="regForm">
+    <div class="err" id="regErr"><i class="fas fa-exclamation-circle"></i><span id="regErrMsg"></span></div>
+    <div class="fg">
+      <label>Store Name</label>
+      <input class="fi" id="rStore" type="text" placeholder="e.g. Juan's Sari-Sari Store">
+    </div>
+    <div class="fg">
+      <label>Username</label>
+      <input class="fi" id="rUser" type="text" placeholder="min. 3 characters" autocomplete="username">
+    </div>
+    <div class="fg">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input class="fi" id="rPass" type="password" placeholder="min. 6 characters" autocomplete="new-password">
+        <button class="pw-eye" onclick="togglePw('rPass',this)" type="button"><i class="fas fa-eye"></i></button>
+      </div>
+    </div>
+    <div class="fg">
+      <label>Confirm Password</label>
+      <div class="pw-wrap">
+        <input class="fi" id="rPass2" type="password" placeholder="repeat password" autocomplete="new-password">
+        <button class="pw-eye" onclick="togglePw('rPass2',this)" type="button"><i class="fas fa-eye"></i></button>
+      </div>
+    </div>
+    <button class="btn btn-p" id="regBtn" onclick="doRegister()">
+      <i class="fas fa-user-plus"></i> Create Account
+    </button>
+  </div>
+</div>
+
+<script>
+function switchTab(t){
+  document.getElementById('loginForm').classList.toggle('active', t==='login');
+  document.getElementById('regForm').classList.toggle('active',  t==='register');
+  document.getElementById('tabLogin').classList.toggle('active', t==='login');
+  document.getElementById('tabReg').classList.toggle('active',   t==='register');
+  clearErrors();
+}
+function togglePw(id,btn){
+  const el=document.getElementById(id);
+  const show=el.type==='password';
+  el.type=show?'text':'password';
+  btn.querySelector('i').className=show?'fas fa-eye-slash':'fas fa-eye';
+}
+function showErr(formId,msg){
+  const el=document.getElementById(formId+'Err');
+  document.getElementById(formId+'ErrMsg').textContent=msg;
+  el.classList.add('on');
+}
+function clearErrors(){
+  ['loginErr','regErr'].forEach(id=>{document.getElementById(id).classList.remove('on')});
+}
+
+function setLoading(btnId,loading){
+  const btn=document.getElementById(btnId);
+  btn.disabled=loading;
+  if(loading) btn.innerHTML='<span class="spin"></span> Please wait…';
+}
+
+async function doLogin(){
+  clearErrors();
+  const user=document.getElementById('lUser').value.trim();
+  const pass=document.getElementById('lPass').value;
+  if(!user||!pass){showErr('login','Please fill in all fields');return;}
+  setLoading('loginBtn',true);
+  try{
+    const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass})});
+    const d=await r.json();
+    if(!r.ok){showErr('login',d.error);return;}
+    window.location.href='/app';
+  }catch(e){showErr('login','Connection error. Try again.');}
+  finally{
+    const btn=document.getElementById('loginBtn');
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-sign-in-alt"></i> Sign In';
+  }
+}
+
+async function doRegister(){
+  clearErrors();
+  const store=document.getElementById('rStore').value.trim();
+  const user =document.getElementById('rUser').value.trim();
+  const pass =document.getElementById('rPass').value;
+  const pass2=document.getElementById('rPass2').value;
+  if(!store||!user||!pass){showErr('reg','Please fill in all fields');return;}
+  if(pass!==pass2){showErr('reg','Passwords do not match');return;}
+  setLoading('regBtn',true);
+  try{
+    const r=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass,store_name:store})});
+    const d=await r.json();
+    if(!r.ok){showErr('reg',d.error);return;}
+    window.location.href='/app';
+  }catch(e){showErr('reg','Connection error. Try again.');}
+  finally{
+    const btn=document.getElementById('regBtn');
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-user-plus"></i> Create Account';
+  }
+}
+
+// Enter key support
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    if(document.getElementById('loginForm').classList.contains('active'))doLogin();
+    else doRegister();
+  }
+});
+</script>
+</body>
+</html>
