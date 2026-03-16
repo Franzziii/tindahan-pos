@@ -29,9 +29,42 @@ def close_db(exc):
     if db:
         db.close()
 
+def _col_exists(db, table, column):
+    """Return True if `column` exists in `table`."""
+    try:
+        rows = db.execute(f"PRAGMA table_info({table})").fetchall()
+        return any(r["name"] == column for r in rows)
+    except Exception:
+        return False
+
+def _table_exists(db, table):
+    row = db.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,)
+    ).fetchone()
+    return row is not None
+
 def init_db():
     with app.app_context():
         db = get_db()
+
+        # ── Detect stale schema and wipe affected tables ─────────────────────
+        # Any table that is missing a required column gets dropped so the
+        # CREATE TABLE IF NOT EXISTS below can rebuild it cleanly.
+        stale = False
+        for table, col in [("products", "user_id"), ("transactions", "user_id"),
+                            ("products", "category"), ("products", "image_data"),
+                            ("transactions", "discount"), ("transactions", "note")]:
+            if _table_exists(db, table) and not _col_exists(db, table, col):
+                stale = True
+                break
+
+        if stale:
+            # Drop in reverse FK order so foreign-key constraints don't block
+            for t in ["transaction_items", "transactions", "products", "users"]:
+                db.execute(f"DROP TABLE IF EXISTS {t}")
+            db.commit()
+
+        # ── Create all tables (safe – IF NOT EXISTS) ─────────────────────────
         db.executescript("""
         CREATE TABLE IF NOT EXISTS users (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,6 +115,18 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_txn_date      ON transactions(created_at);
         CREATE INDEX IF NOT EXISTS idx_txni_txn      ON transaction_items(transaction_id);
         """)
+
+        # ── Step 5: add any missing columns to existing tables (safe ALTERs) ─
+        for col, dflt in [("category", "'General'"), ("image_data", "NULL")]:
+            if not _col_exists(db, "products", col):
+                db.execute(f"ALTER TABLE products ADD COLUMN {col} TEXT DEFAULT {dflt}")
+
+        for col, dflt in [("discount", "0"), ("note", "''")]:
+            if not _col_exists(db, "transactions", col):
+                db.execute(f"ALTER TABLE transactions ADD COLUMN {col} REAL DEFAULT {dflt}"
+                           if col == "discount" else
+                           f"ALTER TABLE transactions ADD COLUMN {col} TEXT DEFAULT {dflt}")
+
         db.commit()
 
 # ─────────────────────────── AUTH ──────────────────────────────────
